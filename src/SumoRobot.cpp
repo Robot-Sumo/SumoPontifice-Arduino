@@ -16,8 +16,8 @@ void SumoRobot::init()
     pinMode(encRightWheel, INPUT_PULLUP); // Debe declarase siempre con INPUT_PULLUP
     pinMode(encLeftWheel, INPUT_PULLUP); // Debe declarase siempre con INPUT_PULLUP
 
-    //attachInterrupt(digitalPinToInterrupt(encRightWheel), EncoderRightWheel, CHANGE);
-    //attachInterrupt(digitalPinToInterrupt(encLeftWheel), EncoderLeftWheel, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(encRightWheel), EncoderRightWheel, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(encLeftWheel), EncoderLeftWheel, CHANGE);
 
     // Outputs
     pinMode(in1, OUTPUT);
@@ -206,6 +206,7 @@ void SumoRobot::EncoderRightWheel(){
 
 
 void SumoRobot::EncoderLeftWheel(){
+    /*
    if ( (micros()-timeEncoder) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
   {
     timeEncoder = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
@@ -215,5 +216,5 @@ void SumoRobot::EncoderLeftWheel(){
     state = !state;
     digitalWrite(LED_BUILTIN, state);
   }
-
+*/
 }

@@ -69,14 +69,25 @@ enum states
 class SumoRobot {
     public:
         SumoRobot();
+        // Funcion de inicializacion: Configura los pines, el puerto serial, las interrupciones
+        // y los timers
         void init();
-        void EncoderRightWheel();
-        void EncoderLeftWheel();
-        void ledColor(int color);
-        void setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool direction);
-        void StateMachine();
+
 
     private:
+
+        // Funcion de interrupcion del encoder rueda derecha
+        static void EncoderRightWheel(); 
+        // Funcion de interrupcion del encoder rueda izquierda
+        static void EncoderLeftWheel();
+        // Funcion para colocar el led RGB en un color dado
+        void ledColor(int color);
+        // Funcion para colocar el pwm del robot y direccion (true, hacia adelante);
+        void setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool direction);
+        // Maquina de estados del dispositivo
+        void StateMachine();
+
+        // Variables
         unsigned long timeArriveCommand;
         // VariablesRobot
         String dataFromMaster= "";         // a String to hold incoming data

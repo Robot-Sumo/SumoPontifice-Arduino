@@ -1,7 +1,10 @@
 #include "SumoRobot.h"
 
-    
-void setup(){/*nothing to setup*/}
+SumoRobot robot;
+void setup(){
+    robot.init();
+}
+
     
 void loop(){
 
