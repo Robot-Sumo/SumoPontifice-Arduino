@@ -74,12 +74,23 @@ class SumoRobot {
         void init();
 
 
-    private:
+        // Variables
 
-        // Funcion de interrupcion del encoder rueda derecha
+        // Variables estaticas de los Encoders
+        static unsigned long encoderRightCounter;
+        static unsigned long encoderLeftCounter;
+        static unsigned long encoderRightTime;
+        static unsigned long encoderLeftTime;
+                // Funcion de interrupcion del encoder rueda derecha
         static void EncoderRightWheel(); 
         // Funcion de interrupcion del encoder rueda izquierda
         static void EncoderLeftWheel();
+
+
+
+    private:
+
+
         // Funcion para colocar el led RGB en un color dado
         void ledColor(int color);
         // Funcion para colocar el pwm del robot y direccion (true, hacia adelante);
@@ -98,8 +109,6 @@ class SumoRobot {
         bool goToPwm, goToStop;
 
 
-
-        // Variables
         bool direction;
         int pwmRightWheel = 0;
         int pwmLeftWheel= 0;

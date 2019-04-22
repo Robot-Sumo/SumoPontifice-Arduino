@@ -188,33 +188,28 @@ void SumoRobot::StateMachine()
 
 
 void SumoRobot::EncoderRightWheel(){
-  /*
   
-  if ( (micros()-timeEncoder) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
+  
+  if ( (micros()-encoderRightTime) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
   {
-    timeEncoder = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
+    encoderRightTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
 
-      counter ++;
-  
-    state = !state;
-    digitalWrite(LED_BUILTIN, state);
+    encoderRightCounter ++;
+
   }
 
-  */
+  
   
 }
 
 
 void SumoRobot::EncoderLeftWheel(){
-    /*
-   if ( (micros()-timeEncoder) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
+   
+  if ( (micros()-encoderLeftTime) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
   {
-    timeEncoder = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
+    encoderLeftTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
 
-      counter ++;
-  
-    state = !state;
-    digitalWrite(LED_BUILTIN, state);
+    encoderLeftCounter++;
+
   }
-*/
 }
