@@ -1,6 +1,5 @@
 #include "SumoRobot.h"
 
-
 SumoRobot::SumoRobot()
 {
     

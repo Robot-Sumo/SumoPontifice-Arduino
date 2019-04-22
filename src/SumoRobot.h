@@ -1,6 +1,7 @@
 #ifndef _SUMOROBOT_H_
 #define _SUMOROBOT_H_
 
+#include "Arduino.h"
 
 // Arduino Nano
 //Comandos del dispositivo
@@ -29,6 +30,7 @@ const int in1b = 6; // pwm1, activado hacia adelante
 const int in2b = 5; // pwm2, activado hacia atrás
 const int diagb = 4; // Diag (señal de sobre corriente)
 // Voltaje de las baterias
+
 const int vbatt1 = A6;
 const int vbatt2 = A7;
 // Encoders
@@ -43,39 +45,6 @@ const int led_Bpin = 12;
 
 
 
-
-// estados del dispositivo
-int currentState, lastState;
-bool goToPwm, goToStop;
-
-
-
-// Variables
-bool direction;
-int pwmRightWheel = 0;
-int pwmLeftWheel= 0;
-unsigned long timeArriveCommand;
-
-
-unsigned long encoderCounter;
-float encoderPeriod;
-const int maxCount = 70;
-bool encoderFlag;
-unsigned long encoderTime = 0;
-bool ledState = LOW;
-unsigned long counter = 0;
-
-unsigned long timeEncoder;
-
-bool state = LOW;
-
-// VariablesRobot
-String dataFromMaster= "";         // a String to hold incoming data
-
-
-
-boolean toggle1 = 0;
-unsigned long timeLast = 0;
 
 
 enum colores
@@ -108,7 +77,42 @@ class SumoRobot {
         void StateMachine();
 
     private:
-    
+        unsigned long timeArriveCommand;
+        // VariablesRobot
+        String dataFromMaster= "";         // a String to hold incoming data
+        
+
+        // estados del dispositivo
+        int currentState, lastState;
+        bool goToPwm, goToStop;
+
+
+
+        // Variables
+        bool direction;
+        int pwmRightWheel = 0;
+        int pwmLeftWheel= 0;
+
+
+
+        unsigned long encoderCounter;
+        float encoderPeriod;
+        const int maxCount = 70;
+        bool encoderFlag;
+        unsigned long encoderTime = 0;
+        bool ledState = LOW;
+        unsigned long counter = 0;
+
+        unsigned long timeEncoder;
+
+        bool state = LOW;
+
+
+
+
+
+        boolean toggle1 = 0;
+        unsigned long timeLast = 0;
 
 
 };
