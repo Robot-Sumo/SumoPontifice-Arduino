@@ -2,6 +2,7 @@
 #define _SUMOROBOT_H_
 
 #include "Arduino.h"
+#include <TimerOne.h>
 
 // Arduino Nano
 //Comandos del dispositivo
@@ -72,22 +73,7 @@ class SumoRobot {
         // Funcion de inicializacion: Configura los pines, el puerto serial, las interrupciones
         // y los timers
         void init();
-
-
-        // Variables
-
-        // Variables estaticas de los Encoders
-        static unsigned long encoderRightCounter;
-        static unsigned long encoderLeftCounter;
-        static unsigned long encoderRightTime;
-        static unsigned long encoderLeftTime;
-                // Funcion de interrupcion del encoder rueda derecha
-        static void EncoderRightWheel(); 
-        // Funcion de interrupcion del encoder rueda izquierda
-        static void EncoderLeftWheel();
-
-
-
+        int run();
     private:
 
 
@@ -97,6 +83,29 @@ class SumoRobot {
         void setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool direction);
         // Maquina de estados del dispositivo
         void StateMachine();
+
+        // Variables
+        // Variables estaticas de los Encoders
+ 
+        static unsigned long encoderRightCounter;
+        static unsigned long encoderLeftCounter;
+        static unsigned long encoderRightTime;
+        static unsigned long encoderLeftTime;
+ 
+        static bool encoderRightFlag;
+        static bool encoderLeftFlag;
+                // Funcion de interrupcion del encoder rueda derecha
+        static void EncoderRightWheel();
+        // Funcion de interrupcion del encoder rueda izquierda
+        static void EncoderLeftWheel();
+
+        static void timer1Isr();
+        //void ISR(TIMER1_COMPA_vect);
+    
+
+
+
+
 
         // Variables
         unsigned long timeArriveCommand;
@@ -112,27 +121,15 @@ class SumoRobot {
         bool direction;
         int pwmRightWheel = 0;
         int pwmLeftWheel= 0;
-
-
-
-        unsigned long encoderCounter;
-        float encoderPeriod;
-        const int maxCount = 70;
-        bool encoderFlag;
-        unsigned long encoderTime = 0;
-        bool ledState = LOW;
-        unsigned long counter = 0;
-
-        unsigned long timeEncoder;
-
-        bool state = LOW;
+        int counter;
 
 
 
 
 
-        boolean toggle1 = 0;
-        unsigned long timeLast = 0;
+
+        static boolean toggle1 ;
+        static unsigned long timeLast ;
 
 
 };

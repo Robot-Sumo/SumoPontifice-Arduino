@@ -1,9 +1,51 @@
 #include "SumoRobot.h"
 
+
+unsigned long SumoRobot::encoderRightCounter;
+unsigned long SumoRobot::encoderLeftCounter;
+unsigned long SumoRobot::encoderRightTime;
+unsigned long SumoRobot::encoderLeftTime;
+
+bool SumoRobot::encoderRightFlag;
+bool SumoRobot::encoderLeftFlag;
+
+
+
+boolean SumoRobot::toggle1 ;
+unsigned long SumoRobot::timeLast ;
+
+//t's just declaration inside of class, and you have to make a space for this variable too (by adding definition).
+
 SumoRobot::SumoRobot()
 {
+
     
 }
+
+
+
+int SumoRobot::run()
+{
+
+    
+
+    if(encoderLeftFlag)
+    {
+        encoderLeftFlag = false;
+        Serial.print("encL ");
+        Serial.println(encoderLeftCounter);
+    }
+    if(encoderRightFlag)
+    {
+        encoderRightFlag = false;
+        Serial.print("encR ");
+        Serial.println(encoderRightCounter);
+    }
+    
+    
+   return 0;
+}
+
 
 void SumoRobot::init()
 {
@@ -15,6 +57,7 @@ void SumoRobot::init()
     pinMode(in2bAux, INPUT); // Debe declarase siempre como entrada
     pinMode(encRightWheel, INPUT_PULLUP); // Debe declarase siempre con INPUT_PULLUP
     pinMode(encLeftWheel, INPUT_PULLUP); // Debe declarase siempre con INPUT_PULLUP
+    
 
     attachInterrupt(digitalPinToInterrupt(encRightWheel), EncoderRightWheel, CHANGE);
     attachInterrupt(digitalPinToInterrupt(encLeftWheel), EncoderLeftWheel, CHANGE);
@@ -33,7 +76,7 @@ void SumoRobot::init()
 
 
     Serial.begin(57600);
-
+    
    
     goToPwm = false;
     goToStop = true;
@@ -42,14 +85,27 @@ void SumoRobot::init()
     pwmLeftWheel = 0;
     pwmRightWheel = 0;
     direction = true;
-    encoderFlag = false;
-    encoderCounter = 10;
-    counter = 0;
-    timeEncoder = micros();
+
+    toggle1 = 0;
+    timeLast = 0;
+
+
+
+    
+    encoderLeftCounter= 0;
+    encoderLeftTime = micros();
+    encoderRightCounter= 0;
+    encoderRightTime = micros();
+    encoderLeftFlag = false;
+    encoderRightFlag = false;
+
+
     setPwm(0, 0, 0);
- 
+    Timer1.initialize(50000);                  // Initialise timer 1 100 ms
+    Timer1.attachInterrupt( timer1Isr );           // attach the ISR routine here
 
     // Configura timer 1 a 25 HZ
+    /*
     cli();//stop interrupts
 
  
@@ -66,7 +122,10 @@ void SumoRobot::init()
     TCCR1B |= (1 << CS12) | (1 << CS10);  
     // enable timer compare interrupt
     TIMSK1 |= (1 << OCIE1A);
+    Timer
     sei();//allow interrupts
+    */
+    
 
 }
 
@@ -189,14 +248,17 @@ void SumoRobot::StateMachine()
 
 void SumoRobot::EncoderRightWheel(){
   
+ 
   
   if ( (micros()-encoderRightTime) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
   {
     encoderRightTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
 
-    encoderRightCounter ++;
+    encoderRightFlag = true;
+    encoderRightCounter++;
 
   }
+  
 
   
   
@@ -204,12 +266,57 @@ void SumoRobot::EncoderRightWheel(){
 
 
 void SumoRobot::EncoderLeftWheel(){
+    
    
   if ( (micros()-encoderLeftTime) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
   {
     encoderLeftTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
-
+    encoderLeftFlag = true;
     encoderLeftCounter++;
 
+
+    
   }
+
+  
+  
+
 }
+
+
+void SumoRobot::timer1Isr()
+{
+       //timer1 interrupt 21Hz toggles pin 13 (LED)
+    //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
+    Serial.println(micros()-timeLast);
+    timeLast = micros();
+    if (toggle1){
+        digitalWrite(13,HIGH);
+        toggle1 = 0;
+    }
+    else{
+        digitalWrite(13,LOW);
+        toggle1 = 1;
+    }
+}
+
+/*
+
+ISR(TIMER1_COMPA_vect)
+{
+    //timer1 interrupt 21Hz toggles pin 13 (LED)
+    //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
+    Serial.println(micros()-timeLast);
+    timeLast = micros();
+    if (toggle1){
+        digitalWrite(13,HIGH);
+        toggle1 = 0;
+    }
+    else{
+        digitalWrite(13,LOW);
+        toggle1 = 1;
+    }
+    
+
+}
+*/

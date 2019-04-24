@@ -3,39 +3,21 @@
 SumoRobot robot;
 void setup(){
     robot.init();
+
 }
 
     
 void loop(){
+    robot.run();
+
 
 }
+
+
 
 
 
 /*
-ISR(TIMER1_COMPA_vect){//timer1 interrupt 21Hz toggles pin 13 (LED)
-//generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
-Serial.println(micros()-timeLast);
- timeLast = micros();
-  if (toggle1){
-    digitalWrite(13,HIGH);
-    toggle1 = 0;
-  }
-  else{
-    digitalWrite(13,LOW);
-    toggle1 = 1;
-  }
- 
-}
-
-
-
-
-
-
-
-
-
 void serialEvent() {
   char inChar;
   while (Serial.available()) {
