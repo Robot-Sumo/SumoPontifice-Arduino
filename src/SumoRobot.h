@@ -2,15 +2,16 @@
 #define _SUMOROBOT_H_
 
 #include "Arduino.h"
-#include <TimerOne.h>
+#include "TimerOne.h"
 
 // Arduino Nano
 //Comandos del dispositivo
 #define setLED_RGB 1 // Poner LED_RGB en un color determinado
 #define setBearingVector 2 // Poner punto de referencia de direccion y velocidad
 #define getBatteryState 3  // Leer voltaje de las baterias y enviar al master
-#define startDistanceMeasure 4 // comando que solicita empezar a medir el dezplazamiento en las ruedas
+#define startEncoderSampling 4 // comando que solicita empezar a medir el dezplazamiento en las ruedas
 #define setSampleFrecuency 6 // Configurar frecuencia de muestreo del dispositivo
+#define getBufferData 7 // Leer la data muestreada por el dispositivo y almacenada en el buffer
 
 // direcciones dispositivos conectados al puerto serial
 
@@ -65,6 +66,7 @@ enum states
     setPWM,
     idle,
     stop
+
 };
 
 class SumoRobot {
@@ -84,27 +86,47 @@ class SumoRobot {
         // Maquina de estados del dispositivo
         void StateMachine();
 
+        void decodeSerial();
+
+        void setCommand();
+
+        void sendBufferData();
+
         // Variables
         // Variables estaticas de los Encoders
  
-        static unsigned long encoderRightCounter;
-        static unsigned long encoderLeftCounter;
+        static long encoderRightCounter;
+        static long encoderLeftCounter;
         static unsigned long encoderRightTime;
         static unsigned long encoderLeftTime;
+        static bool direction;
+
+
  
+        static int encoderRightMeasure;
+        static int encoderLeftMeasure;
+        static long encoderRightSample;
+        static long encoderLeftSample;
+
+
+                // buffer de salida
+        static int encoderRightBuffer[100];
+        static int encoderLeftBuffer[100];
+        static int encoderRightBufferIndex;
+        static int encoderLeftBufferIndex;
+
         static bool encoderRightFlag;
         static bool encoderLeftFlag;
-                // Funcion de interrupcion del encoder rueda derecha
+
+        byte Trama[500];
+        
+        // Funcion de interrupcion del encoder rueda derecha
         static void EncoderRightWheel();
         // Funcion de interrupcion del encoder rueda izquierda
         static void EncoderLeftWheel();
-
-        static void timer1Isr();
-        //void ISR(TIMER1_COMPA_vect);
-    
-
-
-
+        // Funcion ISR de muestreo sincrono
+        static void timer1Isr(); //void ISR(TIMER1_COMPA_vect);
+        
 
 
         // Variables
@@ -118,7 +140,7 @@ class SumoRobot {
         bool goToPwm, goToStop;
 
 
-        bool direction;
+        
         int pwmRightWheel = 0;
         int pwmLeftWheel= 0;
         int counter;
@@ -130,6 +152,8 @@ class SumoRobot {
 
         static boolean toggle1 ;
         static unsigned long timeLast ;
+
+
 
 
 };

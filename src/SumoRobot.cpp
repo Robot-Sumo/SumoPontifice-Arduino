@@ -1,13 +1,30 @@
 #include "SumoRobot.h"
 
 
-unsigned long SumoRobot::encoderRightCounter;
-unsigned long SumoRobot::encoderLeftCounter;
+long SumoRobot::encoderRightCounter;
+long SumoRobot::encoderLeftCounter;
 unsigned long SumoRobot::encoderRightTime;
 unsigned long SumoRobot::encoderLeftTime;
 
 bool SumoRobot::encoderRightFlag;
 bool SumoRobot::encoderLeftFlag;
+bool SumoRobot::direction;
+
+
+
+
+// timer1Isr        
+int SumoRobot::encoderRightMeasure;
+int SumoRobot::encoderLeftMeasure;
+long SumoRobot::encoderRightSample;
+long SumoRobot::encoderLeftSample;
+
+
+        // buffer de salida
+int SumoRobot::encoderRightBuffer[100];
+int SumoRobot::encoderLeftBuffer[100];
+int SumoRobot::encoderRightBufferIndex;
+int SumoRobot::encoderLeftBufferIndex;
 
 
 
@@ -29,21 +46,54 @@ int SumoRobot::run()
 
     
 
-    if(encoderLeftFlag)
-    {
-        encoderLeftFlag = false;
-        Serial.print("encL ");
-        Serial.println(encoderLeftCounter);
-    }
-    if(encoderRightFlag)
-    {
-        encoderRightFlag = false;
-        Serial.print("encR ");
-        Serial.println(encoderRightCounter);
-    }
+  StateMachine();
+}
+
+
+void SumoRobot::StateMachine()
+{
     
-    
-   return 0;
+    switch (currentState){
+        case states::idle:
+            if( (millis()-timeArriveCommand) > 1500)
+            {
+                goToStop = true;
+                timeArriveCommand = millis();
+
+            }
+            if(goToStop) 
+            {
+                goToStop = false;
+                currentState = states::stop;
+            }
+            if(goToPwm) 
+            {
+                goToPwm = false;
+                currentState = states::setPWM;
+            }
+
+            if(Serial.available())
+            {
+                decodeSerial();
+            }
+              
+            break;
+
+        case states::stop:
+            setPwm(0, 0, 1);
+            ledColor(rojo);
+            currentState = idle;
+            break;
+        case states::setPWM:
+            setPwm(pwmLeftWheel, pwmRightWheel, direction);
+            currentState = idle;
+            break;
+        
+            
+
+        
+
+    }
 }
 
 
@@ -98,32 +148,22 @@ void SumoRobot::init()
     encoderRightTime = micros();
     encoderLeftFlag = false;
     encoderRightFlag = false;
+    encoderRightMeasure = 0;
+    encoderLeftMeasure = 0;
+    encoderRightSample = 0;
+    encoderLeftSample = 0;
+    encoderRightBufferIndex = 0;
+    encoderLeftBufferIndex = 0;
 
 
     setPwm(0, 0, 0);
-    Timer1.initialize(50000);                  // Initialise timer 1 100 ms
+    Timer1.initialize(50000);                  // Initialise timer 1 100 m
     Timer1.attachInterrupt( timer1Isr );           // attach the ISR routine here
+    Timer1.stop();
 
     // Configura timer 1 a 25 HZ
     /*
-    cli();//stop interrupts
 
- 
-    //set timer1 interrupt at 21Hz
-    TCCR1A = 0;// set entire TCCR1A register to 0
-    TCCR1B = 0;// same for TCCR1B
-    TCNT1  = 0;//initialize counter value to 0
-    // set compare match register for 21hz increments
-    OCR1A = 624;//= (16*10^6) / (25*1024) - 1 (must be <65536)
-    //  = [ 16,000,000Hz/ (pr  ledColor(amarillo);
-    // turn on CTC mode
-    TCCR1B |= (1 << WGM12);
-    // Set CS10 and CS12 bits for 1024 prescaler
-    TCCR1B |= (1 << CS12) | (1 << CS10);  
-    // enable timer compare interrupt
-    TIMSK1 |= (1 << OCIE1A);
-    Timer
-    sei();//allow interrupts
     */
     
 
@@ -203,48 +243,6 @@ void SumoRobot::ledColor(int color)
 }
 
 
-void SumoRobot::StateMachine()
-{
-    
-    switch (currentState){
-        case states::idle:
-            if( (millis()-timeArriveCommand) > 1500)
-            {
-                goToStop = true;
-                timeArriveCommand = millis();
-
-            }
-            if(goToStop) 
-            {
-                goToStop = false;
-                currentState = states::stop;
-            }
-            if(goToPwm) 
-            {
-                goToPwm = false;
-                currentState = states::setPWM;
-            }
-              
-            break;
-
-        case states::stop:
-            setPwm(0, 0, 1);
-            ledColor(rojo);
-            currentState = idle;
-            break;
-        case states::setPWM:
-            setPwm(pwmLeftWheel, pwmRightWheel, direction);
-            currentState = idle;
-            break;
-            
-
-        
-
-    }
-}
-
-
-
 
 void SumoRobot::EncoderRightWheel(){
   
@@ -252,10 +250,16 @@ void SumoRobot::EncoderRightWheel(){
   
   if ( (micros()-encoderRightTime) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
   {
-    encoderRightTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
+    
+
+    if(direction)
+        encoderRightCounter++;
+    else
+        encoderRightCounter--;
 
     encoderRightFlag = true;
-    encoderRightCounter++;
+    encoderRightTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
+    
 
   }
   
@@ -270,9 +274,13 @@ void SumoRobot::EncoderLeftWheel(){
    
   if ( (micros()-encoderLeftTime) > 3000) // Si ha transcurrido mas de 1000 us desde la ultima interrupcion
   {
+    if(direction)
+        encoderLeftCounter++;
+    else
+        encoderLeftCounter--;
+
     encoderLeftTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
     encoderLeftFlag = true;
-    encoderLeftCounter++;
 
 
     
@@ -288,35 +296,108 @@ void SumoRobot::timer1Isr()
 {
        //timer1 interrupt 21Hz toggles pin 13 (LED)
     //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
-    Serial.println(micros()-timeLast);
-    timeLast = micros();
-    if (toggle1){
-        digitalWrite(13,HIGH);
-        toggle1 = 0;
-    }
-    else{
-        digitalWrite(13,LOW);
-        toggle1 = 1;
-    }
-}
+   // Serial.println(micros()-timeLast);
+    //timeLast = micros();
+    encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
+    encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
 
-/*
-
-ISR(TIMER1_COMPA_vect)
-{
-    //timer1 interrupt 21Hz toggles pin 13 (LED)
-    //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
-    Serial.println(micros()-timeLast);
-    timeLast = micros();
-    if (toggle1){
-        digitalWrite(13,HIGH);
-        toggle1 = 0;
-    }
-    else{
-        digitalWrite(13,LOW);
-        toggle1 = 1;
-    }
+    encoderRightFlag = int(encoderRightCounter- encoderRightSample);
+    encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
     
+    if (toggle1){
+        digitalWrite(13,HIGH);
+        toggle1 = 0;
+    }
+    else{
+        digitalWrite(13,LOW);
+        toggle1 = 1;
+    }
+
+    encoderLeftSample = encoderLeftCounter;
+    encoderRightSample = encoderRightCounter;
+    encoderRightBufferIndex++;
+    encoderLeftBufferIndex++;
 
 }
-*/
+
+void SumoRobot::decodeSerial()
+{
+    char inChar;
+    while (Serial.available()) {
+    // get the new byte:
+    inChar = (char)Serial.read();
+    // add it to the inputString:
+    dataFromMaster += inChar;
+    }
+    // if the incoming character is a newline, set a flag so the main loop can
+    // do something about it:
+    if(inChar == '\n')
+    {
+
+        if(int(dataFromMaster[0]) == 1) // Address match
+        {
+            setCommand();
+            timeArriveCommand = millis();
+        }
+
+        /*
+        if (dataFromMaster[0] == 1)
+        {   
+            pwmLeftWheel = dataFromMaster[2];
+            pwmRightWheel = dataFromMaster[3];
+            direction = (dataFromMaster[4] == 1); // forward o reverse
+            goToPwm = true;
+            
+        }
+        */
+        dataFromMaster ="";
+    }
+}
+
+
+void SumoRobot::setCommand()
+{
+  
+    switch(int(dataFromMaster[1]) ) //command
+    {
+        case setLED_RGB :
+            ledColor(dataFromMaster[2]); // set color
+            break;
+        case setBearingVector:
+            pwmLeftWheel = dataFromMaster[2];
+            pwmRightWheel = dataFromMaster[3];
+            direction = (dataFromMaster[4] == 1); // forward o reverse  
+            break;
+
+        case getBatteryState:
+            break;
+        
+        case startEncoderSampling:
+            Timer1.start();
+            break;
+
+        case setSampleFrecuency:
+            
+            break;
+
+        case getBufferData:
+
+            sendBufferData();
+            encoderRightBufferIndex = 0;
+            encoderRightBufferIndex = 0;
+
+            break;
+
+
+    }
+}
+
+
+void SumoRobot::sendBufferData()
+{
+    uint8_t size ;
+    
+    Serial.write(Trama, size);
+
+
+}

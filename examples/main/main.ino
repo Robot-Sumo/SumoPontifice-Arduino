@@ -14,43 +14,6 @@ void loop(){
 }
 
 
-
-
-
-/*
-void serialEvent() {
-  char inChar;
-  while (Serial.available()) {
-    // get the new byte:
-    inChar = (char)Serial.read();
-    // add it to the inputString:
-    dataFromMaster += inChar;
-    }
-    // if the incoming character is a newline, set a flag so the main loop can
-    // do something about it:
-    if(inChar == '\n')
-    {
-        //setCommand(dataFromMaster);
-
-        if (dataFromMaster[0] == 1)
-        {   
-            pwmLeftWheel = dataFromMaster[2];
-            pwmRightWheel = dataFromMaster[3];
-            direction = (dataFromMaster[4] == 1); // forward o reverse
-            goToPwm = true;
-            timeArriveCommand = millis();
-        }
-        dataFromMaster ="";
-    }
-    
-    
-  
-}
-
-
-*/
-
-
 /*
 void setCommand(String dataFromMaster )
 {

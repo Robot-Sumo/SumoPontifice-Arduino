@@ -14,7 +14,8 @@
                 "/home/lujano/arduino-1.8.6/hardware/tools/**",
                 "/home/lujano/arduino-1.8.6/libraries/**",
                 "/home/lujano/Documents/Arduino/hardware/tools/**",
-                "/home/lujano/Documents/Arduino/libraries/**"
+                "/home/lujano/Documents/Arduino/libraries/**",
+                "/home/lujano/Arduino/libraries/TimerOne-r11/"
             ],
             "forcedInclude": [
                 "/home/lujano/arduino-1.8.7/hardware/arduino/avr/cores/arduino/Arduino.h"
