@@ -366,7 +366,8 @@ void SumoRobot::setCommand()
         case setBearingVector:
             pwmLeftWheel = dataFromMaster[2];
             pwmRightWheel = dataFromMaster[3];
-            direction = (dataFromMaster[4] == 1); // forward o reverse  
+            direction = (dataFromMaster[4] == 1); // forward o reverse 
+            goToPwm = true;
             break;
 
         case getBatteryState:
@@ -395,9 +396,25 @@ void SumoRobot::setCommand()
 
 void SumoRobot::sendBufferData()
 {
-    uint8_t size ;
+    uint8_t sizeData ;
+    uint8_t indexBuffer;
+
+
+    sizeData = 4*encoderLeftBufferIndex; // tamaño total en bytes
+    indexBuffer = 0;
+
+
+    for (int i = 0; i< sizeData; i = i+4)
+    {
+        Trama[i] = (encoderLeftBuffer[indexBuffer]>>8 && 0xff);      // upper byte
+        Trama[i+1] = (encoderLeftBuffer[indexBuffer]&& 0xff);       // lower byte
+        Trama[i+2] = (encoderRightBuffer[indexBuffer]>>8 && 0xff); // upper byte
+        Trama[i+3] = (encoderRightBuffer[indexBuffer] && 0xff);   // lower byte
+
+    }
+
     
-    Serial.write(Trama, size);
+    Serial.write(Trama, sizeData);
 
 
 }
