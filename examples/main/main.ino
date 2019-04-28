@@ -38,4 +38,5 @@ void setCommand(String dataFromMaster )
 }
 */
 
-//sudo ./arduino-cli-0.3.6-alpha.preview-linuxarm compile --fqbn arduino:avr:nano SumoPontifice-Firmware/Encoder
+//sudo ./arduino-cli-0.3.6-alpha.preview-linuxarm compile --fqbn arduino:avr:nano:cpu=atmega328old Arduino/libraries/SumoPontifice-Arduino/examples/main
+//sudo ./arduino-cli-0.3.6-alpha.preview-linuxarm upload -p /dev/ttyUSB0 --fqbn arduino:avr:nano:cpu=atmega328old Arduino/libraries/SumoPontifice-Arduino/examples/main

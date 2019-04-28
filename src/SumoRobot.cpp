@@ -43,10 +43,7 @@ SumoRobot::SumoRobot()
 
 int SumoRobot::run()
 {
-
-    
-
-  StateMachine();
+    StateMachine();
 }
 
 
@@ -123,11 +120,34 @@ void SumoRobot::init()
     pinMode(led_Bpin, OUTPUT);
     pinMode(led1, OUTPUT);
 
-
-
     Serial.begin(57600);
+
+    resetThisDevice();
+       
+    Timer1.initialize(50000);                  // Initialise timer 1 50 m
     
+    //Timer1.start();
+
    
+
+
+
+
+    // Configura timer 1 a 25 HZ
+    /*
+
+    */
+    
+
+}
+
+void SumoRobot::resetThisDevice()
+{
+    ledColor(off);
+    setPwm(0, 0, 0);
+
+    delay(1000);
+        
     goToPwm = false;
     goToStop = true;
     currentState = idle;
@@ -154,18 +174,15 @@ void SumoRobot::init()
     encoderLeftSample = 0;
     encoderRightBufferIndex = 0;
     encoderLeftBufferIndex = 0;
-
-
-    setPwm(0, 0, 0);
-    Timer1.initialize(50000);                  // Initialise timer 1 100 m
-    Timer1.attachInterrupt( timer1Isr );           // attach the ISR routine here
     Timer1.stop();
 
-    // Configura timer 1 a 25 HZ
-    /*
-
-    */
+    dataFromMaster = "";
+    ledColor(morado);
+    delay(1000);
+    ledColor(rojo);
+   
     
+
 
 }
 
@@ -185,6 +202,7 @@ void SumoRobot::setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool directi
         analogWrite(in2, pwmRightWheel);
         digitalWrite(in1, LOW);
         analogWrite(in2b, pwmLeftWheel);
+        analogWrite(led1, pwmLeftWheel);
         digitalWrite(in1b, LOW);
         ledColor(azul);
     }
@@ -298,13 +316,10 @@ void SumoRobot::timer1Isr()
     //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
    // Serial.println(micros()-timeLast);
     //timeLast = micros();
-    encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
-    encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
 
-    encoderRightFlag = int(encoderRightCounter- encoderRightSample);
-    encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
-    
-    if (toggle1){
+
+
+      if (toggle1){
         digitalWrite(13,HIGH);
         toggle1 = 0;
     }
@@ -312,11 +327,20 @@ void SumoRobot::timer1Isr()
         digitalWrite(13,LOW);
         toggle1 = 1;
     }
+    
+    encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
+    encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
+
+    encoderRightFlag = int(encoderRightCounter- encoderRightSample);
+    encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
+    
+  
 
     encoderLeftSample = encoderLeftCounter;
     encoderRightSample = encoderRightCounter;
     encoderRightBufferIndex++;
     encoderLeftBufferIndex++;
+    
 
 }
 
@@ -352,6 +376,18 @@ void SumoRobot::decodeSerial()
         */
         dataFromMaster ="";
     }
+    else
+    {
+            if(int(dataFromMaster[0]) != 1) // Address dont match
+            {
+                delay(100);
+                Serial.flush();
+                dataFromMaster ="";
+            }
+          
+
+    }
+    
 }
 
 
@@ -374,7 +410,8 @@ void SumoRobot::setCommand()
             break;
         
         case startEncoderSampling:
-            Timer1.start();
+            Timer1.attachInterrupt( timer1Isr );           // attach the ISR routine here
+            ledColor(verde);
             break;
 
         case setSampleFrecuency:
@@ -384,9 +421,10 @@ void SumoRobot::setCommand()
         case getBufferData:
 
             sendBufferData();
-            encoderRightBufferIndex = 0;
-            encoderRightBufferIndex = 0;
 
+            break;
+        case resetRobot:
+            resetThisDevice();
             break;
 
 
@@ -412,6 +450,10 @@ void SumoRobot::sendBufferData()
         Trama[i+3] = (encoderRightBuffer[indexBuffer] && 0xff);   // lower byte
 
     }
+
+    // Reiniciar buffer
+    encoderRightBufferIndex = 0; 
+    encoderLeftBufferIndex = 0;
 
     
     Serial.write(Trama, sizeData);

@@ -12,6 +12,7 @@
 #define startEncoderSampling 4 // comando que solicita empezar a medir el dezplazamiento en las ruedas
 #define setSampleFrecuency 6 // Configurar frecuencia de muestreo del dispositivo
 #define getBufferData 7 // Leer la data muestreada por el dispositivo y almacenada en el buffer
+#define resetRobot  8 // Reniciar el robot
 
 // direcciones dispositivos conectados al puerto serial
 
@@ -23,7 +24,7 @@
 // Drivers Motores
 // Driver 1 , izquierdo (Motor rueda derecha)
 const int in1= 11; // pwm1
-const int in2 = 9; // pwm2
+const int in2 =9; // pwm2
 const int diag = 10; // Diag (señal de sobre corriente)
 // Driver 2 , derecho(B) (Motor rueda izquierda)
 const int in1bAux= A0; // pwm1
@@ -92,6 +93,8 @@ class SumoRobot {
 
         void sendBufferData();
 
+        void resetThisDevice();
+
         // Variables
         // Variables estaticas de los Encoders
  
@@ -118,7 +121,7 @@ class SumoRobot {
         static bool encoderRightFlag;
         static bool encoderLeftFlag;
 
-        byte Trama[500];
+        byte Trama[250];
         
         // Funcion de interrupcion del encoder rueda derecha
         static void EncoderRightWheel();
