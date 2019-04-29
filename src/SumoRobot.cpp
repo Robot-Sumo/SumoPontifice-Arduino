@@ -452,10 +452,11 @@ void SumoRobot::sendBufferData()
 
     for (int i = 0; i< sizeData; i = i+4)
     {
-        Trama[i] = (encoderLeftBuffer[indexBuffer]>>8 && 0xff);      // upper byte
-        Trama[i+1] = (encoderLeftBuffer[indexBuffer]&& 0xff);       // lower byte
-        Trama[i+2] = (encoderRightBuffer[indexBuffer]>>8 && 0xff); // upper byte
-        Trama[i+3] = (encoderRightBuffer[indexBuffer] && 0xff);   // lower byte
+        Trama[i] =  ( (encoderLeftBuffer[indexBuffer]>>8) & 0xff);      // upper byte
+        Trama[i+1] = (encoderLeftBuffer[indexBuffer]& 0xff);       // lower byte
+        Trama[i+2] = ((encoderRightBuffer[indexBuffer]>>8) & 0xff); // upper byte
+        Trama[i+3] = (encoderRightBuffer[indexBuffer] & 0xff);   // lower byte
+        indexBuffer++;
 
     }
 
