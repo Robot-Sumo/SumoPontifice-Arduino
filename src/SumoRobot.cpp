@@ -125,6 +125,7 @@ void SumoRobot::init()
     resetThisDevice();
        
     Timer1.initialize(50000);                  // Initialise timer 1 50 m
+    //Timer1.attachInterrupt( timer1Isr );
     
     //Timer1.start();
 
@@ -277,7 +278,7 @@ void SumoRobot::EncoderRightWheel(){
 
     encoderRightFlag = true;
     encoderRightTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
-    
+
 
   }
   
@@ -299,6 +300,8 @@ void SumoRobot::EncoderLeftWheel(){
 
     encoderLeftTime = micros(); // a relacion de 15 de reduccion, maximo 200 rpm, 7.5 ms
     encoderLeftFlag = true;
+
+
 
 
     
@@ -331,15 +334,20 @@ void SumoRobot::timer1Isr()
     encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
     encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
 
-    encoderRightFlag = int(encoderRightCounter- encoderRightSample);
+    encoderRightMeasure = int(encoderRightCounter- encoderRightSample);
     encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
-    
   
 
     encoderLeftSample = encoderLeftCounter;
     encoderRightSample = encoderRightCounter;
     encoderRightBufferIndex++;
     encoderLeftBufferIndex++;
+
+    if(encoderLeftBufferIndex>100) // Reset buffer
+    {
+        encoderLeftBufferIndex = 0;
+        encoderRightBufferIndex = 0;
+    }
     
 
 }
