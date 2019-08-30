@@ -13,7 +13,7 @@ bool SumoRobot::direction;
 
 
 
-// timer1Isr        
+// Timer2Isr        
 int SumoRobot::encoderRightMeasure;
 int SumoRobot::encoderLeftMeasure;
 long SumoRobot::encoderRightSample;
@@ -25,11 +25,13 @@ int SumoRobot::encoderRightBuffer[100];
 int SumoRobot::encoderLeftBuffer[100];
 int SumoRobot::encoderRightBufferIndex;
 int SumoRobot::encoderLeftBufferIndex;
+int SumoRobot::counterTimer2;
 
 
 
 boolean SumoRobot::toggle1 ;
 unsigned long SumoRobot::timeLast ;
+
 
 //t's just declaration inside of class, and you have to make a space for this variable too (by adding definition).
 
@@ -124,10 +126,11 @@ void SumoRobot::init()
 
     resetThisDevice();
        
-    Timer1.initialize(50000);                  // Initialise timer 1 50 m
-    //Timer1.attachInterrupt( timer1Isr );
+    counterTimer2 = 0;
+    Timer2.initialize();                  // Initialise timer 2 500 Hz m
+    //Timer2.attachInterrupt( Timer2Isr );
     
-    //Timer1.start();
+    //Timer2.start();
 
    
 
@@ -175,7 +178,7 @@ void SumoRobot::resetThisDevice()
     encoderLeftSample = 0;
     encoderRightBufferIndex = 0;
     encoderLeftBufferIndex = 0;
-    Timer1.stop();
+    Timer2.stop();
 
     dataFromMaster = "";
     ledColor(morado);
@@ -313,41 +316,45 @@ void SumoRobot::EncoderLeftWheel(){
 }
 
 
-void SumoRobot::timer1Isr()
+void SumoRobot::timer2Isr()
 {
-       //timer1 interrupt 21Hz toggles pin 13 (LED)
+       //Timer2 interrupt 21Hz toggles pin 13 (LED)
     //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
    // Serial.println(micros()-timeLast);
     //timeLast = micros();
+    counterTimer2++;
 
-
-
-      if (toggle1){
-        digitalWrite(13,HIGH);
-        toggle1 = 0;
-    }
-    else{
-        digitalWrite(13,LOW);
-        toggle1 = 1;
-    }
-    
-    encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
-    encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
-
-    encoderRightMeasure = int(encoderRightCounter- encoderRightSample);
-    encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
-  
-
-    encoderLeftSample = encoderLeftCounter;
-    encoderRightSample = encoderRightCounter;
-    encoderRightBufferIndex++;
-    encoderLeftBufferIndex++;
-
-    if(encoderLeftBufferIndex>100) // Reset buffer
+    if (counterTimer2 == 25) // 500 hz / 25 = 20 Hz
     {
-        encoderLeftBufferIndex = 0;
-        encoderRightBufferIndex = 0;
+        counterTimer2 = 0;
+        if (toggle1){
+            digitalWrite(13,HIGH);
+            toggle1 = 0;
+        }
+        else{
+            digitalWrite(13,LOW);
+            toggle1 = 1;
+        }
+        
+        encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
+        encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
+
+        encoderRightMeasure = int(encoderRightCounter- encoderRightSample);
+        encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
+    
+
+        encoderLeftSample = encoderLeftCounter;
+        encoderRightSample = encoderRightCounter;
+        encoderRightBufferIndex++;
+        encoderLeftBufferIndex++;
+
+        if(encoderLeftBufferIndex>100) // Reset buffer
+        {
+            encoderLeftBufferIndex = 0;
+            encoderRightBufferIndex = 0;
+        }
     }
+
     
 
 }
@@ -418,7 +425,7 @@ void SumoRobot::setCommand()
             break;
         
         case startEncoderSampling:
-            Timer1.attachInterrupt( timer1Isr );           // attach the ISR routine here
+            Timer2.attachInterrupt( timer2Isr );           // attach the ISR routine here
             ledColor(verde);
             break;
 

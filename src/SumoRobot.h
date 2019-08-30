@@ -2,7 +2,7 @@
 #define _SUMOROBOT_H_
 
 #include "Arduino.h"
-#include "TimerOne.h"
+#include "TimerTwo.h"
 
 // Arduino Nano
 //Comandos del dispositivo
@@ -23,9 +23,9 @@
 // *** Configuracion de pines ***
 // Drivers Motores
 // Driver 1 , izquierdo (Motor rueda derecha)
-const int in1= 11; // pwm1
+const int in1= 10; // pwm1 Este pin antes era el 11 y se cambio. Ver pcb
 const int in2 =9; // pwm2
-const int diag = 10; // Diag (señal de sobre corriente)
+const int diag = 11; // Diag (señal de sobre corriente). Este pin se dejó al aire
 // Driver 2 , derecho(B) (Motor rueda izquierda)
 const int in1bAux= A0; // pwm1
 const int in2bAux = A1; // pwm2
@@ -102,6 +102,7 @@ class SumoRobot {
         static long encoderLeftCounter;
         static unsigned long encoderRightTime;
         static unsigned long encoderLeftTime;
+        static int counterTimer2;
         static bool direction;
 
 
@@ -128,7 +129,7 @@ class SumoRobot {
         // Funcion de interrupcion del encoder rueda izquierda
         static void EncoderLeftWheel();
         // Funcion ISR de muestreo sincrono
-        static void timer1Isr(); //void ISR(TIMER1_COMPA_vect);
+        static void timer2Isr(); //void ISR(TIMER1_COMPA_vect);
         
 
 
