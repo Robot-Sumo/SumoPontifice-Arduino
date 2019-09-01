@@ -9,6 +9,7 @@ unsigned long SumoRobot::encoderLeftTime;
 bool SumoRobot::encoderRightFlag;
 bool SumoRobot::encoderLeftFlag;
 bool SumoRobot::direction;
+bool SumoRobot::samplingEna;
 
 
 
@@ -159,13 +160,26 @@ void SumoRobot::resetThisDevice()
     pwmLeftWheel = 0;
     pwmRightWheel = 0;
     direction = true;
+    samplingEna = false;
 
     toggle1 = 0;
     timeLast = 0;
 
+    //Timer2.stop();
 
-
+    dataFromMaster = "";
+    ledColor(morado);
+    delay(1000);
+    ledColor(rojo);
+    digitalWrite(13,LOW);
+   
     
+
+
+}
+
+void SumoRobot::resetEncoder()
+{
     encoderLeftCounter= 0;
     encoderLeftTime = micros();
     encoderRightCounter= 0;
@@ -178,18 +192,7 @@ void SumoRobot::resetThisDevice()
     encoderLeftSample = 0;
     encoderRightBufferIndex = 0;
     encoderLeftBufferIndex = 0;
-    Timer2.stop();
-
-    dataFromMaster = "";
-    ledColor(morado);
-    delay(1000);
-    ledColor(rojo);
-   
-    
-
-
 }
-
 void SumoRobot::setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool direction)
 {
 
@@ -322,37 +325,42 @@ void SumoRobot::timer2Isr()
     //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
    // Serial.println(micros()-timeLast);
     //timeLast = micros();
-    counterTimer2++;
 
-    if (counterTimer2 == 25) // 500 hz / 25 = 20 Hz
+    if (samplingEna)
     {
-        counterTimer2 = 0;
-        if (toggle1){
-            digitalWrite(13,HIGH);
-            toggle1 = 0;
-        }
-        else{
-            digitalWrite(13,LOW);
-            toggle1 = 1;
-        }
-        
-        encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
-        encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
+        counterTimer2++;
 
-        encoderRightMeasure = int(encoderRightCounter- encoderRightSample);
-        encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
-    
-
-        encoderLeftSample = encoderLeftCounter;
-        encoderRightSample = encoderRightCounter;
-        encoderRightBufferIndex++;
-        encoderLeftBufferIndex++;
-
-        if(encoderLeftBufferIndex>100) // Reset buffer
+        if (counterTimer2 == 25) // 500 hz / 25 = 20 Hz
         {
-            encoderLeftBufferIndex = 0;
-            encoderRightBufferIndex = 0;
+            counterTimer2 = 0;
+            if (toggle1){
+                digitalWrite(13,HIGH);
+                toggle1 = 0;
+            }
+            else{
+                digitalWrite(13,LOW);
+                toggle1 = 1;
+            }
+            
+            encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
+            encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
+
+            encoderRightMeasure = int(encoderRightCounter- encoderRightSample);
+            encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
+        
+
+            encoderLeftSample = encoderLeftCounter;
+            encoderRightSample = encoderRightCounter;
+            encoderRightBufferIndex++;
+            encoderLeftBufferIndex++;
+
+            if(encoderLeftBufferIndex>100) // Reset buffer
+            {
+                encoderLeftBufferIndex = 0;
+                encoderRightBufferIndex = 0;
+            }
         }
+
     }
 
     
@@ -426,6 +434,8 @@ void SumoRobot::setCommand()
         
         case startEncoderSampling:
             Timer2.attachInterrupt( timer2Isr );           // attach the ISR routine here
+            resetEncoder();
+            samplingEna = true;
             ledColor(verde);
             break;
 

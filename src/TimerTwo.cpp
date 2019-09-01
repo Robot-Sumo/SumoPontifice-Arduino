@@ -61,11 +61,11 @@ void TimerTwo::initialize()
   // turn on CTC mode
   TCCR2A |= (1 << WGM21);
   // Set CS21 bit for 256 prescaler
-  clockSelectBits = (1 << CS22);
+  clockSelectBits = _BV(CS22) | _BV(CS21) ; 
   TCCR2B |= clockSelectBits;   
   // enable timer compare interrupt
   //TIMSK2 |= (1 << OCIE2A);
-  sei();//allow interrupts
+  sei();
   //setPeriod(microseconds);
 }
 /* 
@@ -78,7 +78,7 @@ void TimerTwo::setPeriod(long microseconds)		// AR modified for atomic access
   else if((cycles >>= 3) < RESOLUTION) clockSelectBits = _BV(CS21);              // prescale by /8
   else if((cycles >>= 3) < RESOLUTION) clockSelectBits = _BV(CS21) | _BV(CS20);  // prescale by /64
   else if((cycles >>= 2) < RESOLUTION) clockSelectBits = _BV(CS22);              // prescale by /256
-  else        cycles = RESOLUTION - 1, clockSelectBits = _BV(CS22) | _BV(CS20);  // request was out of bounds, set as maximum
+  else        cycles = RESOLUTION - 1, clockSelectBits = _BV(CS22) | _BV(CS20)  // request was out of bounds, set as maximum
   
   oldSREG = SREG;				
   cli();							// Disable interrupts for 16 bit register access
@@ -133,7 +133,7 @@ void TimerTwo::attachInterrupt(void (*isr)(), long microseconds)
   //TIMSK2 = _BV(TOIE2);                                     // sets the timer overflow interrupt enable bit
 	// might be running with interrupts disabled (eg inside an ISR), so don't touch the global state
 //  sei();
-  resume();												
+// resume();												
 }
 
 void TimerTwo::detachInterrupt()

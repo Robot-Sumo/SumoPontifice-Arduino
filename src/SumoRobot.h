@@ -95,6 +95,8 @@ class SumoRobot {
 
         void resetThisDevice();
 
+        void resetEncoder();
+
         // Variables
         // Variables estaticas de los Encoders
  
@@ -104,6 +106,8 @@ class SumoRobot {
         static unsigned long encoderLeftTime;
         static int counterTimer2;
         static bool direction;
+
+        static bool samplingEna; // habilita el muestreo por timer de los encoders
 
 
  
