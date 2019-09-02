@@ -475,7 +475,7 @@ void SumoRobot::sendBufferData()
     uint8_t indexBuffer;
 
 
-    sizeData = 4*encoderLeftBufferIndex; // tamaño total en bytes
+    sizeData = 6*encoderLeftBufferIndex; // tamaño total en bytes
     indexBuffer = 0;
 
 
