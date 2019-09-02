@@ -475,11 +475,11 @@ void SumoRobot::sendBufferData()
     uint8_t indexBuffer;
 
 
-    sizeData = 6*encoderLeftBufferIndex; // tamaño total en bytes
+    sizeData = 4*encoderLeftBufferIndex+2; // tamaño total en bytes
     indexBuffer = 0;
 
 
-    for (int i = 0; i< sizeData; i = i+4)
+    for (int i = 0; i< sizeData; i = i+6)
     {
         Trama[i] =  ( (encoderLeftBuffer[indexBuffer]>>8) & 0xff);      // upper byte
         Trama[i+1] = (encoderLeftBuffer[indexBuffer]& 0xff);       // lower byte
