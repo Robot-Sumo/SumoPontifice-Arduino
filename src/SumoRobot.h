@@ -64,7 +64,7 @@ off
 
 enum states
 {
-    setPWM,
+    controller,
     idle,
     stop
 
@@ -145,15 +145,45 @@ class SumoRobot {
 
         // estados del dispositivo
         int currentState, lastState;
-        bool goToPwm, goToStop;
+        bool goToStop;
+        static bool goToController;
 
         int driverVel = 0;
         int driverBearing = 0;
+        int pwmRightWheel;
+        int pwmLeftWheel;
 
         // constants
-        constant float Kv = 0.1; // Velocity = Kv*driverVel;
-        constant float Kr = 0.0; // Velocity right = offset+Kr*error;
-        constant float Kl = 0.0; // Velocity left = offset+Kl*error;
+        const float Kv = 0.1; // Velocity = Kv*driverVel;
+
+        // Modelo para velocidad vs pwm
+
+        // PWM = a+coeff*V, donde V es la velocidad deseada en la rueda en interrupts/s
+
+        const float aR = 0.0;
+        const float aL = 0.0;
+        const float coeffR = 0.0; // Velocity right = offset+Kr*error;
+        const float coeffL = 0.0; // Velocity left = offset+Kl*error;
+
+        float velocityLeftWheelSetPoint;
+        float velocityRightWheelSetPoint;
+
+        float velocityLeftWheelMeasure;
+        float velocityRightWheelMeasure;
+
+        float velocityLeftWheelInputController;
+        float velocityRightWheelInputController;
+        float errorRightWheel;
+        float errorLeftWheel;
+        float KRightWheel;
+        float KLeftWheel;
+
+        // Funciones de modelaje
+
+        void Joystick2Velocity();
+        int  Velocity2PWMRightWheel(float velocity);
+        int Velocity2PWMLeftWheel(float velocity);
+
 
 
 

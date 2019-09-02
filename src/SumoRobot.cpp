@@ -8,8 +8,9 @@ unsigned long SumoRobot::encoderLeftTime;
 
 bool SumoRobot::encoderRightFlag;
 bool SumoRobot::encoderLeftFlag;
-bool SumoRobot::direction;
+int SumoRobot::direction;
 bool SumoRobot::samplingEna;
+bool SumoRobot::goToController;
 
 
 
@@ -66,10 +67,10 @@ void SumoRobot::StateMachine()
                 goToStop = false;
                 currentState = states::stop;
             }
-            if(goToPwm) 
+            if(goToController) 
             {
-                goToPwm = false;
-                currentState = states::setPWM;
+                goToController = false;
+                currentState = states::controller;
             }
 
             if(Serial.available())
@@ -84,7 +85,21 @@ void SumoRobot::StateMachine()
             ledColor(rojo);
             currentState = idle;
             break;
-        case states::setPWM:
+        case states::controller:
+
+            // Calcular set point
+            Joystick2Velocity();
+
+            // Calcular error 
+            errorLeftWheel =  velocityLeftWheelSetPoint-velocityLeftWheelMeasure;
+            errorRightWheel =  velocityRightWheelSetPoint-velocityRightWheelMeasure;
+            
+            velocityLeftWheelInputController = velocityLeftWheelSetPoint+KLeftWheel*errorLeftWheel;
+            velocityRightWheelInputController = velocityRightWheelSetPoint+KRightWheel*errorRightWheel;
+
+            pwmLeftWheel = Velocity2PWMLeftWheel(velocityLeftWheelInputController);
+            pwmRightWheel = Velocity2PWMRightWheel(velocityRightWheelInputController);
+
             setPwm(pwmLeftWheel, pwmRightWheel, direction);
             currentState = idle;
             break;
@@ -153,7 +168,7 @@ void SumoRobot::resetThisDevice()
 
     delay(1000);
         
-    goToPwm = false;
+    goToController = false;
     goToStop = true;
     currentState = idle;
     timeArriveCommand = millis();
@@ -196,7 +211,7 @@ void SumoRobot::resetEncoder()
 void SumoRobot::setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool direction)
 {
 
-    if(direction) // forward
+    if(direction == 0) // forward
     {
         analogWrite(in1, pwmRightWheel);
         digitalWrite(in2, LOW);
@@ -204,7 +219,7 @@ void SumoRobot::setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool directi
         digitalWrite(in2b, LOW);
         ledColor(verde);
     }
-    else  // reverse
+    else if (direction == 1) // reverse
     {
         analogWrite(in2, pwmRightWheel);
         digitalWrite(in1, LOW);
@@ -212,6 +227,10 @@ void SumoRobot::setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool directi
         analogWrite(led1, pwmLeftWheel);
         digitalWrite(in1b, LOW);
         ledColor(azul);
+    }
+    else
+    {
+
     }
     if(pwmRightWheel == 0 && pwmLeftWheel == 0) ledColor(rojo);
     
@@ -342,6 +361,7 @@ void SumoRobot::timer2Isr()
         //
         encoderLeftSample = encoderLeftCounter;
         encoderRightSample = encoderRightCounter;
+        goToController = true;
         
         
 
@@ -404,7 +424,7 @@ void SumoRobot::decodeSerial()
             pwmLeftWheel = dataFromMaster[2];
             pwmRightWheel = dataFromMaster[3];
             direction = (dataFromMaster[4] == 1); // forward o reverse
-            goToPwm = true;
+            goToController = true;
             
         }
         */
@@ -434,10 +454,9 @@ void SumoRobot::setCommand()
             ledColor(dataFromMaster[2]); // set color
             break;
         case setBearingVector:
-            driverBearing = dataFromMaster[2];
+            driverBearing = dataFromMaster[2]-127; // to map between -127 and 127;
             driverVel = dataFromMaster[3];
-            direction = (dataFromMaster[4] == 1); // forward o reverse 
-            goToPwm = true;
+            direction = dataFromMaster[4]; // forward o reverse 
             break;
 
         case getBatteryState:
@@ -496,4 +515,22 @@ void SumoRobot::sendBufferData()
     Serial.write(Trama, sizeData);
 
 
+}
+
+
+void SumoRobot::Joystick2Velocity()
+{
+
+
+    if (driverBearing > 0) // Turn Right
+    {
+        velocityLeftWheelSetPoint = Kv*(-2*driverBearing+ driverVel);
+        velocityRightWheelSetPoint =Kv*(driverVel); 
+    }
+    else // Turn Left
+    {
+        velocityLeftWheelSetPoint = Kv*(driverVel);
+        velocityRightWheelSetPoint =Kv*(2*driverBearing+ driverVel);
+    }
+    
 }
