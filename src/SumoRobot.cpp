@@ -157,9 +157,9 @@ void SumoRobot::resetThisDevice()
     goToStop = true;
     currentState = idle;
     timeArriveCommand = millis();
-    pwmLeftWheel = 0;
-    pwmRightWheel = 0;
-    direction = true;
+    driverBearing = 0;
+    driverVel = 0;
+    direction = 0;
     samplingEna = false;
 
     toggle1 = 0;
@@ -326,31 +326,41 @@ void SumoRobot::timer2Isr()
    // Serial.println(micros()-timeLast);
     //timeLast = micros();
 
-    if (samplingEna)
+   
+    counterTimer2++;
+
+    if (counterTimer2 == 25) // 500 hz / 25 = 20 Hz
     {
-        counterTimer2++;
+        counterTimer2 = 0;
 
-        if (counterTimer2 == 25) // 500 hz / 25 = 20 Hz
-        {
-            counterTimer2 = 0;
-            if (toggle1){
-                digitalWrite(13,HIGH);
-                toggle1 = 0;
-            }
-            else{
-                digitalWrite(13,LOW);
-                toggle1 = 1;
-            }
-            
-            encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
-            encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
+   
 
-            encoderRightMeasure = int(encoderRightCounter- encoderRightSample);
-            encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
+        // tomar medidas
+        encoderLeftMeasure = int(encoderLeftCounter- encoderLeftSample);
+        encoderRightMeasure = int(encoderRightCounter- encoderRightSample);    
+        
+        //
+        encoderLeftSample = encoderLeftCounter;
+        encoderRightSample = encoderRightCounter;
+        
         
 
-            encoderLeftSample = encoderLeftCounter;
-            encoderRightSample = encoderRightCounter;
+        if (samplingEna)
+        {
+
+
+            if (toggle1){
+                    digitalWrite(13,HIGH);
+                    toggle1 = 0;
+                }
+            else{
+                    digitalWrite(13,LOW);
+                    toggle1 = 1;
+            }
+            
+            
+            encoderLeftBuffer[encoderLeftBufferIndex] = encoderLeftMeasure;
+            encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
             encoderRightBufferIndex++;
             encoderLeftBufferIndex++;
 
@@ -359,6 +369,7 @@ void SumoRobot::timer2Isr()
                 encoderLeftBufferIndex = 0;
                 encoderRightBufferIndex = 0;
             }
+
         }
 
     }
@@ -423,8 +434,8 @@ void SumoRobot::setCommand()
             ledColor(dataFromMaster[2]); // set color
             break;
         case setBearingVector:
-            pwmLeftWheel = dataFromMaster[2];
-            pwmRightWheel = dataFromMaster[3];
+            driverBearing = dataFromMaster[2];
+            driverVel = dataFromMaster[3];
             direction = (dataFromMaster[4] == 1); // forward o reverse 
             goToPwm = true;
             break;

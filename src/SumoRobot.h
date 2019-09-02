@@ -105,7 +105,7 @@ class SumoRobot {
         static unsigned long encoderRightTime;
         static unsigned long encoderLeftTime;
         static int counterTimer2;
-        static bool direction;
+        static int direction;
 
         static bool samplingEna; // habilita el muestreo por timer de los encoders
 
@@ -147,11 +147,18 @@ class SumoRobot {
         int currentState, lastState;
         bool goToPwm, goToStop;
 
+        int driverVel = 0;
+        int driverBearing = 0;
 
-        
-        int pwmRightWheel = 0;
-        int pwmLeftWheel= 0;
+        // constants
+        constant float Kv = 0.1; // Velocity = Kv*driverVel;
+        constant float Kr = 0.0; // Velocity right = offset+Kr*error;
+        constant float Kl = 0.0; // Velocity left = offset+Kl*error;
+
+
+
         int counter;
+        
 
 
 
