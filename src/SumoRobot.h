@@ -102,6 +102,7 @@ class SumoRobot {
  
         static long encoderRightCounter;
         static long encoderLeftCounter;
+        static char pwmCounter;
         static unsigned long encoderRightTime;
         static unsigned long encoderLeftTime;
         static int counterTimer2;
@@ -120,11 +121,16 @@ class SumoRobot {
                 // buffer de salida
         static int encoderRightBuffer[100];
         static int encoderLeftBuffer[100];
+        static char pwmRightBuffer[100];
+        static char pwmLeftBuffer[100];
         static int encoderRightBufferIndex;
         static int encoderLeftBufferIndex;
 
         static bool encoderRightFlag;
         static bool encoderLeftFlag;
+
+        static int pwmRightWheel;
+        static int pwmLeftWheel;
 
         byte Trama[250];
         
@@ -149,8 +155,7 @@ class SumoRobot {
 
 
         
-        int pwmRightWheel = 0;
-        int pwmLeftWheel= 0;
+        
         int counter;
 
 

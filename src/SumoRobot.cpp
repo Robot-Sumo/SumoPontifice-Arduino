@@ -19,12 +19,17 @@ int SumoRobot::encoderRightMeasure;
 int SumoRobot::encoderLeftMeasure;
 long SumoRobot::encoderRightSample;
 long SumoRobot::encoderLeftSample;
+int SumoRobot::pwmRightWheel;
+int SumoRobot::pwmLeftWheel;
 
 
         // buffer de salida
 int SumoRobot::encoderRightBuffer[100];
 int SumoRobot::encoderLeftBuffer[100];
+char SumoRobot::pwmRightBuffer[100];
+char SumoRobot::pwmLeftBuffer[100];
 int SumoRobot::encoderRightBufferIndex;
+char SumoRobot::pwmCounter;
 int SumoRobot::encoderLeftBufferIndex;
 int SumoRobot::counterTimer2;
 
@@ -192,7 +197,9 @@ void SumoRobot::resetEncoder()
     encoderLeftSample = 0;
     encoderRightBufferIndex = 0;
     encoderLeftBufferIndex = 0;
+    pwmCounter = 0;
 }
+
 void SumoRobot::setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool direction)
 {
 
@@ -347,17 +354,22 @@ void SumoRobot::timer2Isr()
 
             encoderRightMeasure = int(encoderRightCounter- encoderRightSample);
             encoderRightBuffer[encoderRightBufferIndex] = encoderRightMeasure;
+
+            pwmLeftBuffer[pwmCounter] = pwmLeftWheel & 0xff;
+            pwmRightBuffer[pwmCounter] = pwmRightWheel & 0xff;
         
 
             encoderLeftSample = encoderLeftCounter;
             encoderRightSample = encoderRightCounter;
             encoderRightBufferIndex++;
             encoderLeftBufferIndex++;
+            pwmCounter++;
 
             if(encoderLeftBufferIndex>100) // Reset buffer
             {
                 encoderLeftBufferIndex = 0;
                 encoderRightBufferIndex = 0;
+                pwmCounter = 0;
             }
         }
 
@@ -473,6 +485,8 @@ void SumoRobot::sendBufferData()
         Trama[i+1] = (encoderLeftBuffer[indexBuffer]& 0xff);       // lower byte
         Trama[i+2] = ((encoderRightBuffer[indexBuffer]>>8) & 0xff); // upper byte
         Trama[i+3] = (encoderRightBuffer[indexBuffer] & 0xff);   // lower byte
+        Trama[i+4] = pwmLeftBuffer[indexBuffer];   
+        Trama[i+5] = pwmRightBuffer[indexBuffer];  
         indexBuffer++;
 
     }
@@ -480,6 +494,7 @@ void SumoRobot::sendBufferData()
     // Reiniciar buffer
     encoderRightBufferIndex = 0; 
     encoderLeftBufferIndex = 0;
+    pwmCounter = 0;
 
     
     Serial.write(Trama, sizeData);
