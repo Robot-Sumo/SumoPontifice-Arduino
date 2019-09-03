@@ -90,6 +90,10 @@ void SumoRobot::StateMachine()
             // Calcular set point
             Joystick2Velocity();
 
+            // Calcular velocidad actual (rad/s)
+            velocityLeftWheelMeasure = encoderLeftMeasure*constConversion/samplingPeriod; 
+            velocityRightWheelMeasure = encoderRightMeasure*constConversion/samplingPeriod; 
+
             // Calcular error 
             errorLeftWheel =  velocityLeftWheelSetPoint-velocityLeftWheelMeasure;
             errorRightWheel =  velocityRightWheelSetPoint-velocityRightWheelMeasure;
@@ -533,4 +537,14 @@ void SumoRobot::Joystick2Velocity()
         velocityRightWheelSetPoint =Kv*(2*driverBearing+ driverVel);
     }
     
+}
+
+int SumoRobot::Velocity2PWMRightWheel(float velocity)
+{
+    return int(coeffR*velocity + aR);
+}
+
+int SumoRobot::Velocity2PWMLeftWheel(float velocity)
+{
+    return int(coeffL*velocity + aL);  
 }

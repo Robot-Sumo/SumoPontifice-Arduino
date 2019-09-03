@@ -160,10 +160,12 @@ class SumoRobot {
 
         // PWM = a+coeff*V, donde V es la velocidad deseada en la rueda en interrupts/s
 
-        const float aR = 0.0;
-        const float aL = 0.0;
-        const float coeffR = 0.0; // Velocity right = offset+Kr*error;
-        const float coeffL = 0.0; // Velocity left = offset+Kl*error;
+        const float aR = 7.1;
+        const float aL = 43.68;
+        const float coeffR = 5.4; 
+        const float coeffL = 10.14;
+        const float constConversion = 2*3.1416/80.0; // conversion de velocidad
+         
 
         float velocityLeftWheelSetPoint;
         float velocityRightWheelSetPoint;
@@ -175,13 +177,16 @@ class SumoRobot {
         float velocityRightWheelInputController;
         float errorRightWheel;
         float errorLeftWheel;
-        float KRightWheel;
-        float KLeftWheel;
+
+        // constantes proporcionales del controlador , K*error
+        const float KRightWheel = 0.1;
+        const float KLeftWheel = 0.1;// Velocity left = offset+Kl*error;
+        const float samplingPeriod = 0.2;
 
         // Funciones de modelaje
 
         void Joystick2Velocity();
-        int  Velocity2PWMRightWheel(float velocity);
+        int Velocity2PWMRightWheel(float velocity);
         int Velocity2PWMLeftWheel(float velocity);
 
 
