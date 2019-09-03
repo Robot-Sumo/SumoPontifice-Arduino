@@ -154,7 +154,7 @@ class SumoRobot {
         int pwmLeftWheel;
 
         // constants
-        const float Kv = 0.1; // Velocity = Kv*driverVel;
+        const float Kv = 0.0784313; // Velocity = Kv*driverVel;
 
         // Modelo para velocidad vs pwm
 
