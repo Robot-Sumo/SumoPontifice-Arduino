@@ -232,9 +232,10 @@ void SumoRobot::setPwm(uint8_t pwmLeftWheel, uint8_t pwmRightWheel, bool directi
         digitalWrite(in1b, LOW);
         ledColor(azul);
     }
-    else
+    else // stop
     {
-
+        pwmRightWheel = 0;
+        pwmLeftWheel = 0;
     }
     if(pwmRightWheel == 0 && pwmLeftWheel == 0) ledColor(rojo);
     
