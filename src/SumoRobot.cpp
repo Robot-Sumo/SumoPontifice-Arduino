@@ -353,7 +353,7 @@ void SumoRobot::timer2Isr()
    
     counterTimer2++;
 
-    if (counterTimer2 == 25) // 500 hz / 25 = 20 Hz
+    if (counterTimer2 == 4*25) // 500 hz / 25 = 20 Hz
     {
         counterTimer2 = 0;
 
